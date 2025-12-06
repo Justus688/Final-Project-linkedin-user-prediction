@@ -133,7 +133,7 @@ me_df = pd.DataFrame({
 BASE_DIR = Path(__file__).resolve().parent
 col1, col2 = st.columns([3, 1])
 with col1:
-    st.title("LinkedIn User Prediction Tool")
+    st.title("LinkedIn User Prediction App")
 with col2:
     st.image(BASE_DIR / "linkedin_logo.png", width=120)
 
