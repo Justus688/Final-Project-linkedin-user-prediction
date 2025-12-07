@@ -40,7 +40,7 @@ toy_df = pd.DataFrame({
     'col1': [1, 2, 1],
     'col2': [0, 1, 2]
 })
-cleaned_toy_df = toy_df.applymap(clean_sm)
+cleaned_toy_df = toy_df.apply(clean_sm)
 print(cleaned_toy_df)
 
 # create dataframe ss with selected columns and clean the data
@@ -62,7 +62,6 @@ ss.head()
 
 ### 2: load ss into streamlit
 #st.dataframe(ss)
-
 
 ### 3: exploratory data analysis
 # summary statistics
@@ -124,7 +123,6 @@ me_df = pd.DataFrame({
     "Feature": feature_cols,
     "Average Marginal Effect": [f"{effect:.2f}%" for effect in dy_dx]
 })
-
 
 
 ### 7 Build interactive prediction tool
@@ -269,11 +267,12 @@ if run_prediction and inputs_complete:
     # explanation
     st.caption(
         f"The model estimates a {proba:.1%} chance this individual **IS** a LinkedIn user"
-        f" and a {not_proba:.1%} chance this individual **IS NOT** a LinkedIn user."
-        f" For more information on the model and evaluation metrics, expand the Model Evaluation Metrics section below."
+        f" and a {not_proba:.1%} chance this individual **IS NOT** a LinkedIn user.")
+    st.caption(
+        f" See below for model evaluation metrics and a log of all predictions made during this session. (note: click in top right of charts to download as csv file)"
     )
 
-    ### Display model evaluation metrics with buttons to show/hide
+### Display model evaluation metrics with buttons to show/hide
     with st.expander("Show Model Evaluation Metrics"):
         st.markdown("### Model Evaluation Metrics")
         st.write("Confusion Matrix:")
@@ -284,5 +283,24 @@ if run_prediction and inputs_complete:
             "Score": [f"{accuracy:.3f}", f"{precision:.3f}", f"{recall:.3f}", f"{f1_score:.3f}", f"{roc_auc:.3f}"]
         })
         st.pyplot(plt)
-    
-    ### App end
+
+
+    # app stores the users input in a dataframe and adds to it as more predictions are made
+    with st.expander("View and Download Predictions Log"):
+        if "predictions_log" not in st.session_state:
+            st.session_state["predictions_log"] = pd.DataFrame(columns=[
+                "income", "educ", "age", "parent", "married", "female", "probability", "prediction"
+            ])
+        new_entry = {
+            "income": income,
+            "educ": educ,
+            "age": age,
+            "parent": parent,
+            "married": married,
+            "female": gender,
+            "probability": float(prediction_proba),
+            "prediction": int(prediction[0]),
+        }
+        st.session_state["predictions_log"] = pd.concat([st.session_state["predictions_log"], pd.DataFrame([new_entry])], ignore_index=True)
+        st.dataframe(st.session_state["predictions_log"])
+### App end
